@@ -1,0 +1,25 @@
+name: Deploy to DigitalOcean (sus.multibancaexpress.com)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          port: 22
+          script: |
+            cd /home/saas-administrador-web
+            git reset --hard HEAD
+            git pull origin main
+            docker build -t saas-web-app .
+            docker rm -f saas-web-container || true
+            docker run -d --name saas-web-container -p 127.0.0.1:8540:80 --restart always saas-web-app
