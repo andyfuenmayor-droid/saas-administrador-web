@@ -55,7 +55,7 @@ export const Header: React.FC = () => {
           </a>
 
           <a
-            href="https://webapp.multibancaexpress.com/#planes"
+            href="https://multibancaexpress.com/#planes"
             target="_blank"
             rel="noopener noreferrer"
             className="px-3 py-1.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-200 border border-slate-700/50 flex items-center gap-1.5 transition-all hover:border-sky-500/40"
@@ -65,7 +65,7 @@ export const Header: React.FC = () => {
           </a>
 
           <a
-            href="https://webapp.multibancaexpress.com"
+            href="https://multibancaexpress.com"
             target="_blank"
             rel="noopener noreferrer"
             className="px-3 py-1.5 rounded-xl bg-slate-900/80 hover:bg-slate-800 text-slate-200 border border-slate-700/50 flex items-center gap-1.5 transition-all hover:border-amber-500/40"

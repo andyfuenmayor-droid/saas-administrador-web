@@ -282,7 +282,7 @@ export const App: React.FC = () => {
                 </div>
 
                 <a
-                  href="https://webapp.multibancaexpress.com"
+                  href="https://multibancaexpress.com"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700/60 hover:border-amber-500/40 text-amber-400 text-xs font-semibold flex items-center gap-1.5 transition-colors self-start sm:self-auto"
@@ -356,7 +356,7 @@ export const App: React.FC = () => {
                 </div>
 
                 <a
-                  href="https://webapp.multibancaexpress.com/#planes"
+                  href="https://multibancaexpress.com/#planes"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="px-3.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700/60 hover:border-sky-500/40 text-sky-400 text-xs font-semibold flex items-center gap-1.5 transition-colors self-start sm:self-auto"
