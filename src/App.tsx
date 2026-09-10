@@ -105,26 +105,58 @@ export const App: React.FC = () => {
       const uId = adminId || 'f300c8ad-ddd5-4953-a267-d5b3eb80ce39';
 
       // 1. Guardar catálogo consolidado
-      await supabase.from('config_sistema').delete().eq('parametro', 'planes_saas_catalogo');
-      const { error: insErr } = await supabase.from('config_sistema').insert({
-        parametro: 'planes_saas_catalogo',
-        valor: JSON.stringify(newCatalog),
-        user_id: uId
-      });
+      const { data: existing } = await supabase
+        .from('config_sistema')
+        .select('parametro')
+        .eq('parametro', 'planes_saas_catalogo');
+
+      let insErr = null;
+      if (existing && existing.length > 0) {
+        const { error } = await supabase
+          .from('config_sistema')
+          .update({ valor: JSON.stringify(newCatalog) })
+          .eq('parametro', 'planes_saas_catalogo');
+        insErr = error;
+      } else {
+        const { error } = await supabase
+          .from('config_sistema')
+          .insert({
+            parametro: 'planes_saas_catalogo',
+            valor: JSON.stringify(newCatalog),
+            user_id: uId
+          });
+        insErr = error;
+      }
+
       if (insErr) {
-        console.error('Error insertando planes_saas_catalogo:', insErr);
+        console.error('Error guardando planes_saas_catalogo:', insErr);
         return false;
       }
 
       // 2. Guardar plan_modulos_{norm} para compatibilidad con operadora-cms-web
       for (const [name, info] of Object.entries(newCatalog)) {
         const norm = normalizePlanName(name);
-        await supabase.from('config_sistema').delete().eq('parametro', `plan_modulos_${norm}`);
-        await supabase.from('config_sistema').insert({
-          parametro: `plan_modulos_${norm}`,
-          valor: JSON.stringify(info.modulos || TODOS_LOS_MODULOS_CMS),
-          user_id: uId
-        });
+        const paramKey = `plan_modulos_${norm}`;
+        const { data: exMod } = await supabase
+          .from('config_sistema')
+          .select('parametro')
+          .eq('parametro', paramKey);
+
+        const modVal = JSON.stringify(info.modulos || TODOS_LOS_MODULOS_CMS);
+        if (exMod && exMod.length > 0) {
+          await supabase
+            .from('config_sistema')
+            .update({ valor: modVal })
+            .eq('parametro', paramKey);
+        } else {
+          await supabase
+            .from('config_sistema')
+            .insert({
+              parametro: paramKey,
+              valor: modVal,
+              user_id: uId
+            });
+        }
       }
 
       setCatalog(newCatalog);
