@@ -26,8 +26,14 @@ export const QuotationEngine: React.FC<QuotationEngineProps> = ({ lead, catalog,
   const planData = catalog[selectedPlan] || { costo_base: 150.0, costo_por_punto: 5.0, descripcion: '', modulos: [] };
   const pts = typeof lead.puntos_venta === 'number' ? lead.puntos_venta : parseInt(String(lead.puntos_venta)) || 5;
 
-  const baseCost = Number(planData.costo_base) || 150.0;
-  const pointCost = Number(planData.costo_por_punto) || 5.0;
+  const baseCost =
+    planData.costo_base !== undefined && planData.costo_base !== null && !isNaN(Number(planData.costo_base))
+      ? Number(planData.costo_base)
+      : 150.0;
+  const pointCost =
+    planData.costo_por_punto !== undefined && planData.costo_por_punto !== null && !isNaN(Number(planData.costo_por_punto))
+      ? Number(planData.costo_por_punto)
+      : 5.0;
   const totalRaw = baseCost + (pts * pointCost) - Number(discount);
   const finalTotal = Math.max(0, totalRaw);
 

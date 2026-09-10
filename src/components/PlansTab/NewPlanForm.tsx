@@ -9,8 +9,8 @@ interface NewPlanFormProps {
 
 export const NewPlanForm: React.FC<NewPlanFormProps> = ({ catalog, onCreatePlan }) => {
   const [nombre, setNombre] = useState('');
-  const [costoBase, setCostoBase] = useState<number>(180);
-  const [costoPunto, setCostoPunto] = useState<number>(6);
+  const [costoBase, setCostoBase] = useState<number | string>(180);
+  const [costoPunto, setCostoPunto] = useState<number | string>(6);
   const [descripcion, setDescripcion] = useState('');
   const [modulos, setModulos] = useState<string[]>([
     "Inicio", "Pizarra Confirmaciones", "Sistemas", "Monedas", "Cuentas Bancarias",
@@ -45,9 +45,12 @@ export const NewPlanForm: React.FC<NewPlanFormProps> = ({ catalog, onCreatePlan 
     setMsg(null);
 
     const finalMods = ['Inicio', ...modulos.filter(m => m !== 'Inicio')];
+    const numericBase = costoBase === '' || isNaN(Number(costoBase)) ? 0 : Number(costoBase);
+    const numericPunto = costoPunto === '' || isNaN(Number(costoPunto)) ? 0 : Number(costoPunto);
+
     const ok = await onCreatePlan(cleanName, {
-      costo_base: Number(costoBase),
-      costo_por_punto: Number(costoPunto),
+      costo_base: numericBase,
+      costo_por_punto: numericPunto,
       descripcion: descripcion.trim() || 'Plan operativo Multibanca Express',
       modulos: finalMods
     });
@@ -105,9 +108,9 @@ export const NewPlanForm: React.FC<NewPlanFormProps> = ({ catalog, onCreatePlan 
             <input
               type="number"
               min="0"
-              step="5"
+              step="any"
               value={costoBase}
-              onChange={(e) => setCostoBase(Number(e.target.value))}
+              onChange={(e) => setCostoBase(e.target.value === '' ? '' : Number(e.target.value))}
               className="w-full px-3.5 py-2.5 bg-slate-900/70 border border-slate-700/60 rounded-xl text-white text-xs focus:outline-none focus:border-sky-500"
               required
             />
@@ -120,9 +123,9 @@ export const NewPlanForm: React.FC<NewPlanFormProps> = ({ catalog, onCreatePlan 
             <input
               type="number"
               min="0"
-              step="1"
+              step="any"
               value={costoPunto}
-              onChange={(e) => setCostoPunto(Number(e.target.value))}
+              onChange={(e) => setCostoPunto(e.target.value === '' ? '' : Number(e.target.value))}
               className="w-full px-3.5 py-2.5 bg-slate-900/70 border border-slate-700/60 rounded-xl text-white text-xs focus:outline-none focus:border-sky-500"
               required
             />

@@ -106,11 +106,15 @@ export const App: React.FC = () => {
 
       // 1. Guardar catálogo consolidado
       await supabase.from('config_sistema').delete().eq('parametro', 'planes_saas_catalogo');
-      await supabase.from('config_sistema').insert({
+      const { error: insErr } = await supabase.from('config_sistema').insert({
         parametro: 'planes_saas_catalogo',
         valor: JSON.stringify(newCatalog),
         user_id: uId
       });
+      if (insErr) {
+        console.error('Error insertando planes_saas_catalogo:', insErr);
+        return false;
+      }
 
       // 2. Guardar plan_modulos_{norm} para compatibilidad con operadora-cms-web
       for (const [name, info] of Object.entries(newCatalog)) {

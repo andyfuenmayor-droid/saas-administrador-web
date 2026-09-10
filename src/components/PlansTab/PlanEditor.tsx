@@ -13,8 +13,8 @@ export const PlanEditor: React.FC<PlanEditorProps> = ({ catalog, onSavePlan, onD
   const [selectedPlan, setSelectedPlan] = useState<string>(planNames[0] || '');
   
   const [nombre, setNombre] = useState('');
-  const [costoBase, setCostoBase] = useState<number>(150);
-  const [costoPunto, setCostoPunto] = useState<number>(5);
+  const [costoBase, setCostoBase] = useState<number | string>(150);
+  const [costoPunto, setCostoPunto] = useState<number | string>(5);
   const [descripcion, setDescripcion] = useState('');
   const [modulos, setModulos] = useState<string[]>([]);
 
@@ -29,8 +29,16 @@ export const PlanEditor: React.FC<PlanEditorProps> = ({ catalog, onSavePlan, onD
       const data = catalog[current];
       if (data) {
         setNombre(current);
-        setCostoBase(Number(data.costo_base) || 150);
-        setCostoPunto(Number(data.costo_por_punto) || 5);
+        setCostoBase(
+          data.costo_base !== undefined && data.costo_base !== null && !isNaN(Number(data.costo_base))
+            ? Number(data.costo_base)
+            : 150
+        );
+        setCostoPunto(
+          data.costo_por_punto !== undefined && data.costo_por_punto !== null && !isNaN(Number(data.costo_por_punto))
+            ? Number(data.costo_por_punto)
+            : 5
+        );
         setDescripcion(data.descripcion || '');
         setModulos(data.modulos || []);
       }
@@ -57,9 +65,12 @@ export const PlanEditor: React.FC<PlanEditorProps> = ({ catalog, onSavePlan, onD
     setMsg(null);
 
     const finalMods = ['Inicio', ...modulos.filter(m => m !== 'Inicio')];
+    const numericBase = costoBase === '' || isNaN(Number(costoBase)) ? 0 : Number(costoBase);
+    const numericPunto = costoPunto === '' || isNaN(Number(costoPunto)) ? 0 : Number(costoPunto);
+
     const success = await onSavePlan(selectedPlan, nombre.trim(), {
-      costo_base: Number(costoBase),
-      costo_por_punto: Number(costoPunto),
+      costo_base: numericBase,
+      costo_por_punto: numericPunto,
       descripcion: descripcion.trim(),
       modulos: finalMods
     });
@@ -143,9 +154,9 @@ export const PlanEditor: React.FC<PlanEditorProps> = ({ catalog, onSavePlan, onD
             <input
               type="number"
               min="0"
-              step="5"
+              step="any"
               value={costoBase}
-              onChange={(e) => setCostoBase(Number(e.target.value))}
+              onChange={(e) => setCostoBase(e.target.value === '' ? '' : Number(e.target.value))}
               className="w-full px-3.5 py-2.5 bg-slate-900/70 border border-slate-700/60 rounded-xl text-white text-xs focus:outline-none focus:border-emerald-500"
               required
             />
@@ -158,9 +169,9 @@ export const PlanEditor: React.FC<PlanEditorProps> = ({ catalog, onSavePlan, onD
             <input
               type="number"
               min="0"
-              step="1"
+              step="any"
               value={costoPunto}
-              onChange={(e) => setCostoPunto(Number(e.target.value))}
+              onChange={(e) => setCostoPunto(e.target.value === '' ? '' : Number(e.target.value))}
               className="w-full px-3.5 py-2.5 bg-slate-900/70 border border-slate-700/60 rounded-xl text-white text-xs focus:outline-none focus:border-emerald-500"
               required
             />
