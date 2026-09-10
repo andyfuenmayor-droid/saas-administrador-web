@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { ShieldCheck, Lock, User, ArrowRight, Sparkles } from 'lucide-react';
+import { Lock, User, ArrowRight, Sparkles } from 'lucide-react';
 
 export const Login: React.FC = () => {
   const { login } = useAuth();
@@ -33,11 +33,11 @@ export const Login: React.FC = () => {
           <div className="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
           
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-400 p-0.5 shadow-lg shadow-emerald-500/20 mb-4">
-              <div className="w-full h-full bg-[#071217] rounded-2xl flex items-center justify-center">
-                <ShieldCheck className="w-8 h-8 text-emerald-400" />
-              </div>
-            </div>
+            <img 
+              src="/logo.svg" 
+              alt="Multibanca Express" 
+              className="h-12 w-auto mx-auto mb-4 filter drop-shadow-[0_0_15px_rgba(0,229,255,0.4)]" 
+            />
             <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white font-['Outfit']">
               Gestión SaaS
             </h1>
