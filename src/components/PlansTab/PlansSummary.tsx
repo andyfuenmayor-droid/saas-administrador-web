@@ -19,6 +19,7 @@ export const PlansSummary: React.FC<PlansSummaryProps> = ({ catalog }) => {
               <th className="py-3.5 px-4">Plan</th>
               <th className="py-3.5 px-4">Costo Base</th>
               <th className="py-3.5 px-4">Costo / Punto</th>
+              <th className="py-3.5 px-4">Límite Agencias</th>
               <th className="py-3.5 px-4">Total Módulos Activos</th>
               <th className="py-3.5 px-4">Descripción Comercial</th>
             </tr>
@@ -28,6 +29,7 @@ export const PlansSummary: React.FC<PlansSummaryProps> = ({ catalog }) => {
               const modsCount = (data.modulos || []).length;
               const isElite = name.toLowerCase().includes('elite');
               const isPro = name.toLowerCase().includes('profesional');
+              const limVal = data.limite_puntos !== undefined && data.limite_puntos !== null ? Number(data.limite_puntos) : (isElite ? 0 : isPro ? 50 : 15);
               return (
                 <tr key={name} className="hover:bg-white/[0.02] transition-colors">
                   <td className="py-3 px-4 font-bold text-white whitespace-nowrap">
@@ -46,6 +48,17 @@ export const PlansSummary: React.FC<PlansSummaryProps> = ({ catalog }) => {
                   </td>
                   <td className="py-3 px-4 whitespace-nowrap font-bold text-slate-200 text-xs">
                     {formatCurrency(Number(data.costo_por_punto) || 0)}
+                  </td>
+                  <td className="py-3 px-4 whitespace-nowrap">
+                    {limVal === 0 ? (
+                      <span className="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-bold">
+                        ♾️ Ilimitado
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 text-xs font-bold font-mono">
+                        🏢 Hasta {limVal} ag.
+                      </span>
+                    )}
                   </td>
                   <td className="py-3 px-4 whitespace-nowrap">
                     <span className="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 text-xs font-mono font-semibold">

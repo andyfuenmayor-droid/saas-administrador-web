@@ -46,6 +46,7 @@ export interface TrackingLead {
 export interface PlanConfig {
   costo_base: number;
   costo_por_punto: number;
+  limite_puntos?: number; // Límite de puntos de pago / agencias (0 para Ilimitado)
   descripcion: string;
   modulos: string[];
 }
@@ -55,7 +56,7 @@ export type CatalogPlans = Record<string, PlanConfig>;
 export const TODOS_LOS_MODULOS_CMS: string[] = [
   "Inicio", "Pizarra Confirmaciones", "Sistemas", "Monedas", "Cuentas Bancarias", "Agencias", "Cobradores",
   "Cargar Ventas", "Pagos Agencias", "Gastos Agencias", "Saldo Agencias", 
-  "Venta Real", "Rep. Agencia", "Auditoría", "Caja Maestra",
+  "Venta Real", "Auditoría", "Caja Maestra",
   "Pagos a Operador", "Venta Operadora", "Reporte Operadora", "Cierre Operadora", "Config. Proveedores",
   "Gastos Administrativos", "Cierre ", "Ajustes"
 ];
@@ -64,22 +65,24 @@ export const PLANES_DEFAULT_DICT: CatalogPlans = {
   "Básico (SaaS)": {
     costo_base: 150.0,
     costo_por_punto: 5.0,
+    limite_puntos: 15,
     descripcion: "Gestión operativa completa de agencias hasta Caja Maestra.",
     modulos: [
       "Inicio", "Pizarra Confirmaciones", "Sistemas", "Monedas", "Cuentas Bancarias", "Agencias", "Cobradores",
       "Cargar Ventas", "Pagos Agencias", "Gastos Agencias", "Saldo Agencias", 
-      "Venta Real", "Rep. Agencia", "Caja Maestra",
+      "Venta Real", "Caja Maestra",
       "Cierre ", "Ajustes"
     ]
   },
   "Profesional": {
     costo_base: 250.0,
     costo_por_punto: 8.0,
+    limite_puntos: 50,
     descripcion: "Gestión integral de Agencias, Operadoras y Proveedores.",
     modulos: [
       "Inicio", "Pizarra Confirmaciones", "Sistemas", "Monedas", "Cuentas Bancarias", "Agencias", "Cobradores",
       "Cargar Ventas", "Pagos Agencias", "Gastos Agencias", "Saldo Agencias", 
-      "Venta Real", "Rep. Agencia", "Caja Maestra",
+      "Venta Real", "Caja Maestra",
       "Pagos a Operador", "Venta Operadora", "Reporte Operadora", "Cierre Operadora", "Config. Proveedores",
       "Cierre ", "Ajustes"
     ]
@@ -87,6 +90,7 @@ export const PLANES_DEFAULT_DICT: CatalogPlans = {
   "Elite": {
     costo_base: 500.0,
     costo_por_punto: 12.0,
+    limite_puntos: 0,
     descripcion: "Control total sin límites: Incluye Auditoría Híbrida y Gastos Administrativos.",
     modulos: [...TODOS_LOS_MODULOS_CMS]
   }

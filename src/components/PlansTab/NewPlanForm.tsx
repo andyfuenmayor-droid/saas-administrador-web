@@ -11,6 +11,7 @@ export const NewPlanForm: React.FC<NewPlanFormProps> = ({ catalog, onCreatePlan 
   const [nombre, setNombre] = useState('');
   const [costoBase, setCostoBase] = useState<number | string>(180);
   const [costoPunto, setCostoPunto] = useState<number | string>(6);
+  const [limitePuntos, setLimitePuntos] = useState<number | string>(20);
   const [descripcion, setDescripcion] = useState('');
   const [modulos, setModulos] = useState<string[]>([
     "Inicio", "Pizarra Confirmaciones", "Sistemas", "Monedas", "Cuentas Bancarias",
@@ -47,10 +48,12 @@ export const NewPlanForm: React.FC<NewPlanFormProps> = ({ catalog, onCreatePlan 
     const finalMods = ['Inicio', ...modulos.filter(m => m !== 'Inicio')];
     const numericBase = costoBase === '' || isNaN(Number(costoBase)) ? 0 : Number(costoBase);
     const numericPunto = costoPunto === '' || isNaN(Number(costoPunto)) ? 0 : Number(costoPunto);
+    const numericLimite = limitePuntos === '' || isNaN(Number(limitePuntos)) ? 0 : Number(limitePuntos);
 
     const ok = await onCreatePlan(cleanName, {
       costo_base: numericBase,
       costo_por_punto: numericPunto,
+      limite_puntos: numericLimite,
       descripcion: descripcion.trim() || 'Plan operativo Multibanca Express',
       modulos: finalMods
     });
@@ -60,6 +63,7 @@ export const NewPlanForm: React.FC<NewPlanFormProps> = ({ catalog, onCreatePlan 
       setMsg({ text: `¡Plan ${cleanName} creado con éxito!`, type: 'success' });
       setNombre('');
       setDescripcion('');
+      setLimitePuntos(20);
     } else {
       setMsg({ text: 'Error al crear el nuevo plan en la base de datos', type: 'error' });
     }
@@ -100,7 +104,7 @@ export const NewPlanForm: React.FC<NewPlanFormProps> = ({ catalog, onCreatePlan 
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <label className="block text-xs font-semibold text-slate-400 mb-1">
               💰 Costo Base (USD):
@@ -129,6 +133,25 @@ export const NewPlanForm: React.FC<NewPlanFormProps> = ({ catalog, onCreatePlan 
               className="w-full px-3.5 py-2.5 bg-slate-900/70 border border-slate-700/60 rounded-xl text-white text-xs focus:outline-none focus:border-sky-500"
               required
             />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-400 mb-1">
+              🏢 Límite Puntos / Agencias:
+            </label>
+            <input
+              type="number"
+              min="0"
+              step="1"
+              value={limitePuntos}
+              onChange={(e) => setLimitePuntos(e.target.value === '' ? '' : Number(e.target.value))}
+              placeholder="0 = Ilimitado"
+              className="w-full px-3.5 py-2.5 bg-slate-900/70 border border-slate-700/60 rounded-xl text-white text-xs focus:outline-none focus:border-sky-500"
+              required
+            />
+            <span className="text-[10px] text-slate-500 mt-1 block font-mono">
+              {Number(limitePuntos) === 0 ? '♾️ Ilimitado (sin límite)' : `Hasta ${limitePuntos} agencias`}
+            </span>
           </div>
         </div>
 

@@ -15,6 +15,7 @@ export const PlanEditor: React.FC<PlanEditorProps> = ({ catalog, onSavePlan, onD
   const [nombre, setNombre] = useState('');
   const [costoBase, setCostoBase] = useState<number | string>(150);
   const [costoPunto, setCostoPunto] = useState<number | string>(5);
+  const [limitePuntos, setLimitePuntos] = useState<number | string>(0);
   const [descripcion, setDescripcion] = useState('');
   const [modulos, setModulos] = useState<string[]>([]);
 
@@ -38,6 +39,11 @@ export const PlanEditor: React.FC<PlanEditorProps> = ({ catalog, onSavePlan, onD
           data.costo_por_punto !== undefined && data.costo_por_punto !== null && !isNaN(Number(data.costo_por_punto))
             ? Number(data.costo_por_punto)
             : 5
+        );
+        setLimitePuntos(
+          data.limite_puntos !== undefined && data.limite_puntos !== null && !isNaN(Number(data.limite_puntos))
+            ? Number(data.limite_puntos)
+            : 0
         );
         setDescripcion(data.descripcion || '');
         setModulos(data.modulos || []);
@@ -67,10 +73,12 @@ export const PlanEditor: React.FC<PlanEditorProps> = ({ catalog, onSavePlan, onD
     const finalMods = ['Inicio', ...modulos.filter(m => m !== 'Inicio')];
     const numericBase = costoBase === '' || isNaN(Number(costoBase)) ? 0 : Number(costoBase);
     const numericPunto = costoPunto === '' || isNaN(Number(costoPunto)) ? 0 : Number(costoPunto);
+    const numericLimite = limitePuntos === '' || isNaN(Number(limitePuntos)) ? 0 : Number(limitePuntos);
 
     const success = await onSavePlan(selectedPlan, nombre.trim(), {
       costo_base: numericBase,
       costo_por_punto: numericPunto,
+      limite_puntos: numericLimite,
       descripcion: descripcion.trim(),
       modulos: finalMods
     });
@@ -146,7 +154,7 @@ export const PlanEditor: React.FC<PlanEditorProps> = ({ catalog, onSavePlan, onD
           />
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
             <label className="block text-xs font-semibold text-slate-400 mb-1">
               💰 Costo Base (USD):
@@ -175,6 +183,25 @@ export const PlanEditor: React.FC<PlanEditorProps> = ({ catalog, onSavePlan, onD
               className="w-full px-3.5 py-2.5 bg-slate-900/70 border border-slate-700/60 rounded-xl text-white text-xs focus:outline-none focus:border-emerald-500"
               required
             />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-400 mb-1">
+              🏢 Límite Puntos / Agencias:
+            </label>
+            <input
+              type="number"
+              min="0"
+              step="1"
+              value={limitePuntos}
+              onChange={(e) => setLimitePuntos(e.target.value === '' ? '' : Number(e.target.value))}
+              placeholder="0 = Ilimitado"
+              className="w-full px-3.5 py-2.5 bg-slate-900/70 border border-slate-700/60 rounded-xl text-white text-xs focus:outline-none focus:border-emerald-500"
+              required
+            />
+            <span className="text-[10px] text-slate-500 mt-1 block font-mono">
+              {Number(limitePuntos) === 0 ? '♾️ Ilimitado (sin límite)' : `Hasta ${limitePuntos} agencias`}
+            </span>
           </div>
         </div>
 
