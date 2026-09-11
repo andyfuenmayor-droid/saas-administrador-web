@@ -122,21 +122,6 @@ export const NewPlanForm: React.FC<NewPlanFormProps> = ({ catalog, onCreatePlan 
 
           <div>
             <label className="block text-xs font-semibold text-slate-400 mb-1">
-              📍 Costo / Punto (USD):
-            </label>
-            <input
-              type="number"
-              min="0"
-              step="any"
-              value={costoPunto}
-              onChange={(e) => setCostoPunto(e.target.value === '' ? '' : Number(e.target.value))}
-              className="w-full px-3.5 py-2.5 bg-slate-900/70 border border-slate-700/60 rounded-xl text-white text-xs focus:outline-none focus:border-sky-500"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-slate-400 mb-1">
               🏢 Límite Puntos / Agencias:
             </label>
             <input
@@ -152,6 +137,21 @@ export const NewPlanForm: React.FC<NewPlanFormProps> = ({ catalog, onCreatePlan 
             <span className="text-[10px] text-slate-500 mt-1 block font-mono">
               {Number(limitePuntos) === 0 ? '♾️ Ilimitado (sin límite)' : `Hasta ${limitePuntos} agencias`}
             </span>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-400 mb-1">
+              📍 Costo / Punto Adicional (USD):
+            </label>
+            <input
+              type="number"
+              min="0"
+              step="any"
+              value={costoPunto}
+              onChange={(e) => setCostoPunto(e.target.value === '' ? '' : Number(e.target.value))}
+              className="w-full px-3.5 py-2.5 bg-slate-900/70 border border-slate-700/60 rounded-xl text-white text-xs focus:outline-none focus:border-sky-500"
+              required
+            />
           </div>
         </div>
 

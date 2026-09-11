@@ -18,8 +18,8 @@ export const PlansSummary: React.FC<PlansSummaryProps> = ({ catalog }) => {
             <tr>
               <th className="py-3.5 px-4">Plan</th>
               <th className="py-3.5 px-4">Costo Base</th>
-              <th className="py-3.5 px-4">Costo / Punto</th>
               <th className="py-3.5 px-4">Límite Agencias</th>
+              <th className="py-3.5 px-4">Costo / Punto Adic.</th>
               <th className="py-3.5 px-4">Total Módulos Activos</th>
               <th className="py-3.5 px-4">Descripción Comercial</th>
             </tr>
@@ -46,9 +46,6 @@ export const PlansSummary: React.FC<PlansSummaryProps> = ({ catalog }) => {
                   <td className="py-3 px-4 whitespace-nowrap font-extrabold text-emerald-400 text-sm font-['Outfit']">
                     {formatCurrency(Number(data.costo_base) || 0)}
                   </td>
-                  <td className="py-3 px-4 whitespace-nowrap font-bold text-slate-200 text-xs">
-                    {formatCurrency(Number(data.costo_por_punto) || 0)}
-                  </td>
                   <td className="py-3 px-4 whitespace-nowrap">
                     {limVal === 0 ? (
                       <span className="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 text-xs font-bold">
@@ -59,6 +56,9 @@ export const PlansSummary: React.FC<PlansSummaryProps> = ({ catalog }) => {
                         🏢 Hasta {limVal} ag.
                       </span>
                     )}
+                  </td>
+                  <td className="py-3 px-4 whitespace-nowrap font-bold text-slate-200 text-xs">
+                    {formatCurrency(Number(data.costo_por_punto) || 0)}
                   </td>
                   <td className="py-3 px-4 whitespace-nowrap">
                     <span className="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 text-xs font-mono font-semibold">

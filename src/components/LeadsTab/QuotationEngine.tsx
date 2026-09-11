@@ -33,8 +33,14 @@ export const QuotationEngine: React.FC<QuotationEngineProps> = ({ lead, catalog,
   const pointCost =
     planData.costo_por_punto !== undefined && planData.costo_por_punto !== null && !isNaN(Number(planData.costo_por_punto))
       ? Number(planData.costo_por_punto)
-      : 5.0;
-  const totalRaw = baseCost + (pts * pointCost) - Number(discount);
+      : 0.0;
+  const pointLimit =
+    planData.limite_puntos !== undefined && planData.limite_puntos !== null && !isNaN(Number(planData.limite_puntos))
+      ? Number(planData.limite_puntos)
+      : 0;
+
+  const extraPts = pointLimit > 0 ? Math.max(0, pts - pointLimit) : 0;
+  const totalRaw = baseCost + (extraPts * pointCost) - Number(discount);
   const finalTotal = Math.max(0, totalRaw);
 
   const paymentOptions = ['Zelle', 'PayPal', 'Binance (USDT)', 'Pago Móvil', 'Transferencia ACH', 'Efectivo'];
@@ -166,7 +172,9 @@ export const QuotationEngine: React.FC<QuotationEngineProps> = ({ lead, catalog,
           {formatCurrency(finalTotal)}
         </div>
         <p className="text-[11px] text-slate-400 mt-1">
-          Base: {formatCurrency(baseCost)} + ({pts} pts × {formatCurrency(pointCost)})
+          Base: {formatCurrency(baseCost)}
+          {pointLimit > 0 ? ` (hasta ${pointLimit} ag. incl.)` : ' (ilimitado)'}
+          {extraPts > 0 ? ` + (${extraPts} pts adic. × ${formatCurrency(pointCost)})` : ''}
           {discount > 0 && ` - Descuento: ${formatCurrency(discount)}`}
         </p>
       </div>
