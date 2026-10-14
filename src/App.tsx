@@ -42,6 +42,11 @@ export const App: React.FC = () => {
     email: string;
     password: string;
     telefono?: string;
+    agencyName?: string;
+    taquillaUser?: string;
+    taquillaPass?: string;
+    currenciesCount?: number;
+    systemsCount?: number;
   } | null>(null);
 
   // Normalizador de nombre de plan

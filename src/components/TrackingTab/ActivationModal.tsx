@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { TrackingLead } from '../../types';
 import { supabase } from '../../lib/supabase';
-import { X, CheckCircle2, Key, Mail, Building2, ShieldCheck, AlertCircle } from 'lucide-react';
+import { provisionTenantFromDatabase } from '../../utils/tenantProvisioner';
+import { X, CheckCircle2, Key, Mail, Building2, ShieldCheck, AlertCircle, Coins, Layers, Store } from 'lucide-react';
 
 interface ActivationModalProps {
   lead: TrackingLead;
@@ -12,6 +13,11 @@ interface ActivationModalProps {
     email: string;
     password: string;
     telefono?: string;
+    agencyName?: string;
+    taquillaUser?: string;
+    taquillaPass?: string;
+    currenciesCount?: number;
+    systemsCount?: number;
   }) => void;
 }
 
@@ -23,6 +29,7 @@ export const ActivationModal: React.FC<ActivationModalProps> = ({ lead, onClose,
   const defaultPass = cleanPhone.length >= 6 ? `ME${cleanPhone.slice(-6)}` : 'ME2026!';
   const [password, setPassword] = useState(defaultPass);
   const [activating, setActivating] = useState(false);
+  const [provisioningStatus, setProvisioningStatus] = useState<string>('');
   const [errorMsg, setErrorMsg] = useState('');
 
   const handleActivate = async (e: React.FormEvent) => {
@@ -34,6 +41,7 @@ export const ActivationModal: React.FC<ActivationModalProps> = ({ lead, onClose,
 
     setActivating(true);
     setErrorMsg('');
+    setProvisioningStatus('Creando cuenta de usuario...');
 
     try {
       // 1. Crear usuario en Supabase Auth via Proxy Seguro /api/admin-users/
@@ -66,6 +74,7 @@ export const ActivationModal: React.FC<ActivationModalProps> = ({ lead, onClose,
       }
 
       // 2. Insertar perfil completo del suscriptor
+      setProvisioningStatus('Configurando perfil de banca...');
       const now = new Date();
       const venc = new Date();
       venc.setDate(venc.getDate() + 365);
@@ -90,7 +99,12 @@ export const ActivationModal: React.FC<ActivationModalProps> = ({ lead, onClose,
       const { error: profileErr } = await supabase.from('perfiles').insert(profileData);
       if (profileErr) throw profileErr;
 
-      // 3. Eliminar de la tabla leads_seguimiento
+      // 3. Aprovisionar automáticamente desde la Base de Datos:
+      // Monedas de la BD + Sistemas de la BD + Agencia Demo + Terminal Taquilla POS
+      setProvisioningStatus('Aprovisionando monedas, sistemas y taquilla demo desde la base de datos...');
+      const provisionRes = await provisionTenantFromDatabase(userId, lead.banca);
+
+      // 4. Eliminar de la tabla leads_seguimiento
       await supabase.from('leads_seguimiento').delete().eq('id', lead.id);
 
       onActivated({
@@ -98,13 +112,19 @@ export const ActivationModal: React.FC<ActivationModalProps> = ({ lead, onClose,
         representante: lead.representante,
         email: email.trim(),
         password: password.trim(),
-        telefono: lead.telefono
+        telefono: lead.telefono,
+        agencyName: provisionRes.agencyName,
+        taquillaUser: provisionRes.taquillaUser,
+        taquillaPass: provisionRes.taquillaPass,
+        currenciesCount: provisionRes.currenciesCount,
+        systemsCount: provisionRes.systemsCount,
       });
 
     } catch (err: any) {
       console.error('Error al dar de alta al suscriptor:', err);
       setErrorMsg(err.message || 'Error al crear credenciales y activar perfil');
       setActivating(false);
+      setProvisioningStatus('');
     }
   };
 
@@ -135,6 +155,16 @@ export const ActivationModal: React.FC<ActivationModalProps> = ({ lead, onClose,
             </div>
             <div className="text-slate-400">👤 Representante: <span className="text-slate-200">{lead.representante}</span></div>
             <div className="text-slate-400">🏆 Plan Cotizado: <span className="text-emerald-400 font-bold">{lead.plan_cotizado} ({lead.puntos_venta} pts)</span></div>
+          </div>
+
+          {/* Banner de Aprovisionamiento Automático */}
+          <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-xs space-y-1">
+            <div className="font-bold text-emerald-400 flex items-center gap-1.5">
+              <span>⚡ Aprovisionamiento Dinámico de BD</span>
+            </div>
+            <p className="text-[11px] text-slate-300 leading-relaxed">
+              No quedará en blanco: El sistema heredará en vivo las <strong>monedas activas en BD</strong> (BS, USD, COP), los <strong>sistemas de lotería</strong> y creará una <strong>Taquilla Demo</strong> para probar el POS inmediatamente.
+            </p>
           </div>
 
           {errorMsg && (
