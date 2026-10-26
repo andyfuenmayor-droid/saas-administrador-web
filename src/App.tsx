@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from './context/AuthContext';
 import { supabase } from './lib/supabase';
-import { ClientProfile, Lead, TrackingLead, CatalogPlans, PLANES_DEFAULT_DICT, TODOS_LOS_MODULOS_CMS } from './types';
+import { ClientProfile, Lead, TrackingLead, CatalogPlans, MasterSystem, MasterCurrency, PLANES_DEFAULT_DICT, TODOS_LOS_MODULOS_CMS } from './types';
 import { Header } from './components/Header';
 import { MetricsCards } from './components/MetricsCards';
 import { Login } from './components/Login';
@@ -17,12 +17,13 @@ import { PlansSummary } from './components/PlansTab/PlansSummary';
 import { PlanEditor } from './components/PlansTab/PlanEditor';
 import { NewPlanForm } from './components/PlansTab/NewPlanForm';
 import { FactoryReset } from './components/PlansTab/FactoryReset';
-import { Users, Send, Clock, Settings2, RefreshCw, ExternalLink, Globe } from 'lucide-react';
+import { MasterCatalogTab } from './components/MasterCatalogTab/MasterCatalogTab';
+import { Users, Send, Clock, Settings2, RefreshCw, ExternalLink, Globe, Database } from 'lucide-react';
 
 export const App: React.FC = () => {
   const { isAuthenticated, adminId } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<'clients' | 'leads' | 'tracking' | 'plans'>('clients');
+  const [activeTab, setActiveTab] = useState<'clients' | 'leads' | 'tracking' | 'plans' | 'master-catalog'>('clients');
   const [loading, setLoading] = useState(true);
 
   // Data states
@@ -30,6 +31,8 @@ export const App: React.FC = () => {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [trackingLeads, setTrackingLeads] = useState<TrackingLead[]>([]);
   const [catalog, setCatalog] = useState<CatalogPlans>(PLANES_DEFAULT_DICT);
+  const [masterSystems, setMasterSystems] = useState<MasterSystem[]>([]);
+  const [masterCurrencies, setMasterCurrencies] = useState<MasterCurrency[]>([]);
 
   // Modal states
   const [selectedClientForEdit, setSelectedClientForEdit] = useState<ClientProfile | null>(null);
@@ -90,6 +93,32 @@ export const App: React.FC = () => {
         } catch (e) {
           console.error('Error parseando planes_saas_catalogo:', e);
         }
+      }
+
+      // 5. Catálogo Maestro de Sistemas Globales
+      try {
+        const { data: sysData, error: sysErr } = await supabase
+          .from('catalogo_sistemas_maestro')
+          .select('*')
+          .order('nombre_sistema', { ascending: true });
+        if (!sysErr && sysData) {
+          setMasterSystems(sysData as MasterSystem[]);
+        }
+      } catch (err) {
+        console.warn('Error cargando catalogo_sistemas_maestro:', err);
+      }
+
+      // 6. Catálogo Maestro de Monedas Globales
+      try {
+        const { data: curData, error: curErr } = await supabase
+          .from('catalogo_monedas_maestro')
+          .select('*')
+          .order('es_base', { ascending: false });
+        if (!curErr && curData) {
+          setMasterCurrencies(curData as MasterCurrency[]);
+        }
+      } catch (err) {
+        console.warn('Error cargando catalogo_monedas_maestro:', err);
       }
     } catch (err) {
       console.error('Error cargando datos del sistema:', err);
@@ -199,6 +228,109 @@ export const App: React.FC = () => {
     return await saveCatalogToDb(PLANES_DEFAULT_DICT);
   };
 
+  // Operaciones de Catálogo Maestro Global
+  const handleSaveMasterSystem = async (sys: Partial<MasterSystem>): Promise<boolean> => {
+    try {
+      if (sys.id) {
+        const { error } = await supabase
+          .from('catalogo_sistemas_maestro')
+          .update({
+            nombre_sistema: sys.nombre_sistema,
+            col_agencia: sys.col_agencia,
+            col_venta: sys.col_venta,
+            col_premio: sys.col_premio,
+            descripcion: sys.descripcion,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', sys.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('catalogo_sistemas_maestro')
+          .insert({
+            nombre_sistema: sys.nombre_sistema,
+            col_agencia: sys.col_agencia || 'Agencia',
+            col_venta: sys.col_venta || 'Venta',
+            col_premio: sys.col_premio || 'Premio',
+            descripcion: sys.descripcion || null
+          });
+        if (error) throw error;
+      }
+      await loadAllData();
+      return true;
+    } catch (err) {
+      console.error('Error guardando sistema maestro:', err);
+      return false;
+    }
+  };
+
+  const handleDeleteMasterSystem = async (sys: MasterSystem): Promise<boolean> => {
+    try {
+      if (!sys.id) return false;
+      const { error } = await supabase
+        .from('catalogo_sistemas_maestro')
+        .delete()
+        .eq('id', sys.id);
+      if (error) throw error;
+      await loadAllData();
+      return true;
+    } catch (err) {
+      console.error('Error eliminando sistema maestro:', err);
+      return false;
+    }
+  };
+
+  const handleSaveMasterCurrency = async (cur: Partial<MasterCurrency>): Promise<boolean> => {
+    try {
+      if (cur.id) {
+        const { error } = await supabase
+          .from('catalogo_monedas_maestro')
+          .update({
+            codigo: cur.codigo,
+            nombre: cur.nombre,
+            simbolo: cur.simbolo,
+            decimales: cur.decimales,
+            es_base: cur.es_base,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', cur.id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('catalogo_monedas_maestro')
+          .insert({
+            codigo: cur.codigo,
+            nombre: cur.nombre,
+            simbolo: cur.simbolo,
+            decimales: cur.decimales ?? 2,
+            es_base: cur.es_base ?? false
+          });
+        if (error) throw error;
+      }
+      await loadAllData();
+      return true;
+    } catch (err) {
+      console.error('Error guardando moneda maestra:', err);
+      return false;
+    }
+  };
+
+  const handleDeleteMasterCurrency = async (cur: MasterCurrency): Promise<boolean> => {
+    try {
+      if (!cur.id) return false;
+      const { error } = await supabase
+        .from('catalogo_monedas_maestro')
+        .delete()
+        .eq('id', cur.id);
+      if (error) throw error;
+      await loadAllData();
+      return true;
+    } catch (err) {
+      console.error('Error eliminando moneda maestra:', err);
+      return false;
+    }
+  };
+
   const handleDeleteTrackingLead = async (lead: TrackingLead) => {
     if (!window.confirm(`¿Eliminar la solicitud de ${lead.banca}?`)) return;
     try {
@@ -259,6 +391,18 @@ export const App: React.FC = () => {
             >
               <Clock className="w-4 h-4" />
               <span>Seguimiento ({trackingLeads.length})</span>
+            </button>
+
+                        <button
+              onClick={() => setActiveTab('master-catalog')}
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
+                activeTab === 'master-catalog'
+                  ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30 shadow-lg shadow-amber-500/10'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Database className="w-4 h-4" />
+              <span>Catálogo Global ({masterSystems.length + masterCurrencies.length})</span>
             </button>
 
             <button

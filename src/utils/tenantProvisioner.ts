@@ -11,62 +11,90 @@ export interface ProvisioningResult {
   error?: string;
 }
 
-/**
- * Normaliza nombres eliminando espacios sobrantes
- */
 function cleanName(str: string): string {
   return (str || '').trim();
 }
 
-/**
- * Extrae dinámicamente el catálogo maestro de monedas y sistemas actualmente activos en la base de datos
- */
 export async function fetchDatabaseCatalog(): Promise<{
   currencies: { Nombre_Moneda: string; Simbolo: string }[];
   systems: string[];
 }> {
   try {
-    // 1. Obtener todas las monedas de la base de datos
-    const { data: rawCurrencies } = await supabase
-      .from('monedas')
-      .select('Nombre_Moneda, Simbolo');
-
     const currencyMap = new Map<string, { Nombre_Moneda: string; Simbolo: string }>();
+    const systemSet = new Set<string>();
 
-    if (rawCurrencies && rawCurrencies.length > 0) {
-      rawCurrencies.forEach((c: any) => {
-        const name = cleanName(c.Nombre_Moneda || c.nombre_moneda || '');
-        const symbol = cleanName(c.Simbolo || c.simbolo || name);
-        if (name) {
-          const key = name.toUpperCase();
-          if (!currencyMap.has(key)) {
-            currencyMap.set(key, { Nombre_Moneda: name, Simbolo: symbol });
+    // 1. Monedas desde catálogo maestro global
+    try {
+      const { data: masterCurrencies } = await supabase
+        .from('catalogo_monedas_maestro')
+        .select('codigo, nombre, simbolo')
+        .order('es_base', { ascending: false });
+
+      if (masterCurrencies && masterCurrencies.length > 0) {
+        masterCurrencies.forEach((c: any) => {
+          const code = cleanName(c.codigo || c.nombre || '');
+          const symbol = cleanName(c.simbolo || code);
+          if (code && !currencyMap.has(code.toUpperCase())) {
+            currencyMap.set(code.toUpperCase(), { Nombre_Moneda: code, Simbolo: symbol });
           }
-        }
-      });
+        });
+      }
+    } catch (_) {}
+
+    // Fallback de monedas operativas si estuviera vacío
+    if (currencyMap.size === 0) {
+      const { data: rawCurrencies } = await supabase
+        .from('monedas')
+        .select('Nombre_Moneda, Simbolo');
+
+      if (rawCurrencies && rawCurrencies.length > 0) {
+        rawCurrencies.forEach((c: any) => {
+          const name = cleanName(c.Nombre_Moneda || c.nombre_moneda || '');
+          const symbol = cleanName(c.Simbolo || c.simbolo || name);
+          if (name) {
+            const key = name.toUpperCase();
+            if (!currencyMap.has(key)) {
+              currencyMap.set(key, { Nombre_Moneda: name, Simbolo: symbol });
+            }
+          }
+        });
+      }
     }
 
-    // Si la BD no tuviese monedas, fallback de seguridad a las 3 principales
+    // Fallback de seguridad
     if (currencyMap.size === 0) {
       currencyMap.set('BS', { Nombre_Moneda: 'Bs', Simbolo: 'Bs' });
       currencyMap.set('USD', { Nombre_Moneda: 'USD', Simbolo: '$' });
       currencyMap.set('COP', { Nombre_Moneda: 'COP', Simbolo: 'COP' });
     }
 
-    // 2. Obtener todos los sistemas de lotería y apuestas de la base de datos
-    const { data: rawSystems } = await supabase
-      .from('sistemas')
-      .select('nombre_sistema');
+    // 2. Sistemas desde catálogo maestro global
+    try {
+      const { data: masterSystems } = await supabase
+        .from('catalogo_sistemas_maestro')
+        .select('nombre_sistema')
+        .order('nombre_sistema', { ascending: true });
 
-    const systemSet = new Set<string>();
+      if (masterSystems && masterSystems.length > 0) {
+        masterSystems.forEach((s: any) => {
+          const name = cleanName(s.nombre_sistema || '');
+          if (name) systemSet.add(name.toUpperCase());
+        });
+      }
+    } catch (_) {}
 
-    if (rawSystems && rawSystems.length > 0) {
-      rawSystems.forEach((s: any) => {
-        const name = cleanName(s.nombre_sistema || '');
-        if (name) {
-          systemSet.add(name.toUpperCase());
-        }
-      });
+    // Fallback de sistemas operativos
+    if (systemSet.size === 0) {
+      const { data: rawSystems } = await supabase
+        .from('sistemas')
+        .select('nombre_sistema');
+
+      if (rawSystems && rawSystems.length > 0) {
+        rawSystems.forEach((s: any) => {
+          const name = cleanName(s.nombre_sistema || '');
+          if (name) systemSet.add(name.toUpperCase());
+        });
+      }
     }
 
     // Fallback de seguridad si no hubiera ninguno
@@ -93,10 +121,6 @@ export async function fetchDatabaseCatalog(): Promise<{
   }
 }
 
-/**
- * Aprovisiona completamente un nuevo SaaS Tenant con Monedas, Sistemas,
- * Agencia Demo y Terminal Taquilla con cajero operativo.
- */
 export async function provisionTenantFromDatabase(
   userId: string,
   bancaName: string
@@ -117,10 +141,8 @@ export async function provisionTenantFromDatabase(
   }
 
   try {
-    // 1. Consultar catálogo vivo de la base de datos
     const { currencies, systems } = await fetchDatabaseCatalog();
 
-    // 2. Insertar monedas para el nuevo suscriptor
     const currenciesPayload = currencies.map((c) => ({
       Nombre_Moneda: c.Nombre_Moneda,
       Simbolo: c.Simbolo,
@@ -134,7 +156,6 @@ export async function provisionTenantFromDatabase(
       console.error('Error insertando monedas para el tenant:', currErr);
     }
 
-    // 3. Insertar sistemas para el nuevo suscriptor
     const systemsPayload = systems.map((sys) => ({
       nombre_sistema: sys,
       user_id: userId,
@@ -147,12 +168,11 @@ export async function provisionTenantFromDatabase(
       console.error('Error insertando sistemas para el tenant:', sysErr);
     }
 
-    // 4. Preparar credenciales de Taquilla Demo
     const safeBancaSlug = (bancaName || 'banca')
       .toLowerCase()
       .replace(/[^a-z0-9]/g, '')
       .slice(0, 8);
-    const taquillaUser = `taq_${safeBancaSlug || 'demo'}`;
+    const taquillaUser = 'taq_' + (safeBancaSlug || 'demo');
     const taquillaPass = '123456';
     const agencyName = 'AGENCIA 01 - DEMO';
 
@@ -160,13 +180,12 @@ export async function provisionTenantFromDatabase(
     result.taquillaPass = taquillaPass;
     result.agencyName = agencyName;
 
-    // 5. Construir condiciones de sistemas por defecto (15% de comisión estándar)
     const currencyNames = currencies.map((c) => c.Nombre_Moneda);
     const condicionesSistemas: Record<string, any> = {};
 
     systems.forEach((sys) => {
       currencyNames.forEach((mon) => {
-        const comboKey = `${sys}_${mon}`;
+        const comboKey = sys + '_' + mon;
         condicionesSistemas[comboKey] = {
           sistema: sys,
           moneda: mon,
@@ -175,7 +194,6 @@ export async function provisionTenantFromDatabase(
           participacion: 0,
         };
       });
-      // Fallback base por sistema
       condicionesSistemas[sys] = {
         sistema: sys,
         codigo: agencyName,
@@ -183,7 +201,6 @@ export async function provisionTenantFromDatabase(
       };
     });
 
-    // 6. Insertar Agencia Demo en 'agencias'
     const agencyPayload = {
       nombre_agencia: agencyName,
       sistemas: systems.join(', '),
@@ -215,7 +232,6 @@ export async function provisionTenantFromDatabase(
     } else if (agencyData) {
       result.agencyId = agencyData.id;
 
-      // 7. Insertar Taquilla / Cajero en 'taquilla_usuarios'
       const cashierPayload = {
         user_id: userId,
         agencia_id: agencyData.id,
@@ -239,7 +255,7 @@ export async function provisionTenantFromDatabase(
     return result;
   } catch (err: any) {
     console.error('Error general en aprovisionamiento dinámico:', err);
-    result.error = err.message || 'Error desconocido';
+    result.error = err?.message || 'Error desconocido';
     return result;
   }
 }

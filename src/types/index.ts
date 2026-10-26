@@ -46,52 +46,78 @@ export interface TrackingLead {
 export interface PlanConfig {
   costo_base: number;
   costo_por_punto: number;
-  limite_puntos?: number; // Límite de puntos de pago / agencias (0 para Ilimitado)
+  limite_puntos?: number;
   descripcion: string;
   modulos: string[];
 }
 
 export type CatalogPlans = Record<string, PlanConfig>;
 
+export interface MasterSystem {
+  id?: number;
+  nombre_sistema: string;
+  col_agencia: string;
+  col_venta: string;
+  col_premio: string;
+  descripcion?: string;
+  icono?: string;
+  creado_por_user_id?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface MasterCurrency {
+  id?: number;
+  codigo: string;
+  nombre: string;
+  simbolo: string;
+  decimales: number;
+  es_base: boolean;
+  icono?: string;
+  creado_por_user_id?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export const TODOS_LOS_MODULOS_CMS: string[] = [
-  "Inicio", "Pizarra Confirmaciones", "Sistemas", "Monedas", "Cuentas Bancarias", "Agencias", "Cobradores",
-  "Cargar Ventas", "Pagos Agencias", "Gastos Agencias", "Saldo Agencias", 
-  "Venta Real", "Auditoría", "Caja Maestra",
-  "Pagos a Operador", "Venta Operadora", "Reporte Operadora", "Cierre Operadora", "Config. Proveedores",
-  "Gastos Administrativos", "Cierre ", "Ajustes"
+  'Inicio', 'Pizarra Confirmaciones', 'Sistemas', 'Monedas', 'Cuentas Bancarias', 'Agencias', 'Cobradores',
+  'Cargar Ventas', 'Pagos Agencias', 'Gastos Agencias', 'Saldo Agencias', 
+  'Venta Real', 'Auditoría', 'Caja Maestra',
+  'Pagos a Operador', 'Venta Operadora', 'Reporte Operadora', 'Cierre Operadora', 'Config. Proveedores',
+  'Gastos Administrativos', 'Cierre ', 'Ajustes'
 ];
 
 export const PLANES_DEFAULT_DICT: CatalogPlans = {
-  "Básico (SaaS)": {
+  'Básico (SaaS)': {
     costo_base: 150.0,
     costo_por_punto: 5.0,
     limite_puntos: 15,
-    descripcion: "Gestión operativa completa de agencias hasta Caja Maestra.",
+    descripcion: 'Gestión operativa completa de agencias hasta Caja Maestra.',
     modulos: [
-      "Inicio", "Pizarra Confirmaciones", "Sistemas", "Monedas", "Cuentas Bancarias", "Agencias", "Cobradores",
-      "Cargar Ventas", "Pagos Agencias", "Gastos Agencias", "Saldo Agencias", 
-      "Venta Real", "Caja Maestra",
-      "Cierre ", "Ajustes"
+      'Inicio', 'Pizarra Confirmaciones', 'Sistemas', 'Monedas', 'Cuentas Bancarias', 'Agencias', 'Cobradores',
+      'Cargar Ventas', 'Pagos Agencias', 'Gastos Agencias', 'Saldo Agencias', 
+      'Venta Real', 'Caja Maestra',
+      'Cierre ', 'Ajustes'
     ]
   },
-  "Profesional": {
+  'Profesional': {
     costo_base: 250.0,
     costo_por_punto: 8.0,
     limite_puntos: 50,
-    descripcion: "Gestión integral de Agencias, Operadoras y Proveedores.",
+    descripcion: 'Gestión integral de Agencias, Operadoras y Proveedores.',
     modulos: [
-      "Inicio", "Pizarra Confirmaciones", "Sistemas", "Monedas", "Cuentas Bancarias", "Agencias", "Cobradores",
-      "Cargar Ventas", "Pagos Agencias", "Gastos Agencias", "Saldo Agencias", 
-      "Venta Real", "Caja Maestra",
-      "Pagos a Operador", "Venta Operadora", "Reporte Operadora", "Cierre Operadora", "Config. Proveedores",
-      "Cierre ", "Ajustes"
+      'Inicio', 'Pizarra Confirmaciones', 'Sistemas', 'Monedas', 'Cuentas Bancarias', 'Agencias', 'Cobradores',
+      'Cargar Ventas', 'Pagos Agencias', 'Gastos Agencias', 'Saldo Agencias', 
+      'Venta Real', 'Caja Maestra',
+      'Pagos a Operador', 'Venta Operadora', 'Reporte Operadora', 'Cierre Operadora', 'Config. Proveedores',
+      'Cierre ', 'Ajustes'
     ]
   },
-  "Elite": {
+  'Elite': {
     costo_base: 500.0,
     costo_por_punto: 12.0,
     limite_puntos: 0,
-    descripcion: "Control total sin límites: Incluye Auditoría Híbrida y Gastos Administrativos.",
+    descripcion: 'Control total sin límites: Incluye Auditoría Híbrida y Gastos Administrativos.',
     modulos: [...TODOS_LOS_MODULOS_CMS]
   }
 };
