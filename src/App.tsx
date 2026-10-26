@@ -571,6 +571,18 @@ export const App: React.FC = () => {
               <FactoryReset onResetToFactory={handleResetToFactory} />
             </div>
           )}
+
+          {/* Tab 5: Catálogo Global Maestro */}
+          {activeTab === 'master-catalog' && (
+            <MasterCatalogTab
+              systems={masterSystems}
+              currencies={masterCurrencies}
+              onSaveSystem={handleSaveMasterSystem}
+              onDeleteSystem={handleDeleteMasterSystem}
+              onSaveCurrency={handleSaveMasterCurrency}
+              onDeleteCurrency={handleDeleteMasterCurrency}
+            />
+          )}
         </div>
 
       </main>
