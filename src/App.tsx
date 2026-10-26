@@ -17,13 +17,14 @@ import { PlansSummary } from './components/PlansTab/PlansSummary';
 import { PlanEditor } from './components/PlansTab/PlanEditor';
 import { NewPlanForm } from './components/PlansTab/NewPlanForm';
 import { FactoryReset } from './components/PlansTab/FactoryReset';
-import { MasterCatalogTab } from './components/MasterCatalogTab/MasterCatalogTab';
-import { Users, Send, Clock, Settings2, RefreshCw, ExternalLink, Globe, Database } from 'lucide-react';
+import { SystemsMasterTab } from './components/MasterCatalogTab/SystemsMasterTab';
+import { CurrenciesMasterTab } from './components/MasterCatalogTab/CurrenciesMasterTab';
+import { Users, Send, Clock, Settings2, RefreshCw, ExternalLink, Globe, Layers, Coins } from 'lucide-react';
 
 export const App: React.FC = () => {
   const { isAuthenticated, adminId } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<'clients' | 'leads' | 'tracking' | 'plans' | 'master-catalog'>('clients');
+  const [activeTab, setActiveTab] = useState<'clients' | 'leads' | 'tracking' | 'plans' | 'systems' | 'currencies'>('clients');
   const [loading, setLoading] = useState(true);
 
   // Data states
@@ -394,15 +395,27 @@ export const App: React.FC = () => {
             </button>
 
                         <button
-              onClick={() => setActiveTab('master-catalog')}
+              onClick={() => setActiveTab('systems')}
               className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
-                activeTab === 'master-catalog'
+                activeTab === 'systems'
+                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 shadow-lg shadow-emerald-500/10'
+                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              <Layers className="w-4 h-4" />
+              <span>Catálogo Sistemas ({masterSystems.length})</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('currencies')}
+              className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 whitespace-nowrap ${
+                activeTab === 'currencies'
                   ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30 shadow-lg shadow-amber-500/10'
                   : 'text-slate-400 hover:text-white hover:bg-white/5'
               }`}
             >
-              <Database className="w-4 h-4" />
-              <span>Catálogo Global ({masterSystems.length + masterCurrencies.length})</span>
+              <Coins className="w-4 h-4" />
+              <span>Catálogo Monedas ({masterCurrencies.length})</span>
             </button>
 
             <button
@@ -572,13 +585,19 @@ export const App: React.FC = () => {
             </div>
           )}
 
-          {/* Tab 5: Catálogo Global Maestro */}
-          {activeTab === 'master-catalog' && (
-            <MasterCatalogTab
+          {/* Tab 5: Catálogo Sistemas */}
+          {activeTab === 'systems' && (
+            <SystemsMasterTab
               systems={masterSystems}
-              currencies={masterCurrencies}
               onSaveSystem={handleSaveMasterSystem}
               onDeleteSystem={handleDeleteMasterSystem}
+            />
+          )}
+
+          {/* Tab 6: Catálogo Monedas */}
+          {activeTab === 'currencies' && (
+            <CurrenciesMasterTab
+              currencies={masterCurrencies}
               onSaveCurrency={handleSaveMasterCurrency}
               onDeleteCurrency={handleDeleteMasterCurrency}
             />
