@@ -14,6 +14,7 @@ export const SystemsMasterTable: React.FC<Props> = ({
   systems,
   onOpenCreate,
   onOpenEdit,
+  onOpenTest,
   onDelete,
 }) => {
   const [search, setSearch] = useState('');
@@ -85,8 +86,20 @@ export const SystemsMasterTable: React.FC<Props> = ({
                           <div className="font-bold text-white text-sm font-['Outfit']">
                             {sys.nombre_sistema}
                           </div>
-                          <div className="text-[10px] text-slate-500">
-                            ID: #{sys.id || 'N/A'}
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[10px] text-slate-500 font-mono">
+                              ID: #{sys.id || 'N/A'}
+                            </span>
+                            {sys.nombre_sistema.toUpperCase() === 'PRUEBA' ? (
+                              <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                                🟡 Pendiente de Prueba
+                              </span>
+                            ) : (
+                              <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-0.5">
+                                <Check className="w-2.5 h-2.5" />
+                                <span>Certificado con Prueba</span>
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -115,6 +128,14 @@ export const SystemsMasterTable: React.FC<Props> = ({
 
                     <td className="px-4 py-3.5 text-right">
                       <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() => (onOpenTest ? onOpenTest(sys) : onOpenEdit(sys))}
+                          title="Ejecutar prueba de carga con un archivo real de este sistema"
+                          className="px-2.5 py-1.5 rounded-lg bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-[11px] font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+                        >
+                          <FlaskConical className="w-3.5 h-3.5" />
+                          <span>Probar Carga</span>
+                        </button>
                         <button
                           onClick={() => onOpenEdit(sys)}
                           title="Editar sistema o cabeceras"
