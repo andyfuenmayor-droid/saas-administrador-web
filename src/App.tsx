@@ -19,12 +19,13 @@ import { NewPlanForm } from './components/PlansTab/NewPlanForm';
 import { FactoryReset } from './components/PlansTab/FactoryReset';
 import { SystemsMasterTab } from './components/MasterCatalogTab/SystemsMasterTab';
 import { CurrenciesMasterTab } from './components/MasterCatalogTab/CurrenciesMasterTab';
-import { Users, Send, Clock, Settings2, RefreshCw, ExternalLink, Globe, Layers, Coins } from 'lucide-react';
+import { SystemTesterTab } from './components/MasterCatalogTab/SystemTesterTab';
+import { Users, Send, Clock, Settings2, RefreshCw, ExternalLink, Globe, Layers, Coins, FlaskConical } from 'lucide-react';
 
 export const App: React.FC = () => {
   const { isAuthenticated, adminId } = useAuth();
 
-  const [activeTab, setActiveTab] = useState<'clients' | 'leads' | 'tracking' | 'plans' | 'systems' | 'currencies'>('clients');
+  const [activeTab, setActiveTab] = useState<'clients' | 'leads' | 'tracking' | 'plans' | 'systems' | 'currencies' | 'tester'>('clients');
   const [loading, setLoading] = useState(true);
 
   // Data states

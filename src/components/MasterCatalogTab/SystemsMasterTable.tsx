@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { MasterSystem } from '../../types';
-import { Search, Plus, Edit2, Trash2, Layers, FileSpreadsheet } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Layers, FileSpreadsheet, FlaskConical, ShieldCheck, Check } from 'lucide-react';
 
 interface Props {
   systems: MasterSystem[];
   onOpenCreate: () => void;
   onOpenEdit: (sys: MasterSystem) => void;
+  onOpenTest?: (sys: MasterSystem) => void;
   onDelete: (sys: MasterSystem) => void;
 }
 
@@ -49,7 +50,7 @@ export const SystemsMasterTable: React.FC<Props> = ({
           className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-xs font-bold rounded-xl shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 transition-all shrink-0"
         >
           <Plus className="w-4 h-4" />
-          <span>Nuevo Sistema Global</span>
+          <span>+ Nuevo Sistema (Con Prueba de Carga)</span>
         </button>
       </div>
 

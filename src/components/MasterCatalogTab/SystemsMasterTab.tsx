@@ -83,6 +83,7 @@ export const SystemsMasterTab: React.FC<Props> = ({
         systems={systems}
         onOpenCreate={handleCreate}
         onOpenEdit={handleEdit}
+        onOpenTest={handleEdit}
         onDelete={handleDelete}
       />
 
